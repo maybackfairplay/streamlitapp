@@ -36,10 +36,53 @@ st.markdown(
         linear-gradient(180deg, var(--bg1), var(--bg0));
       background-size: 42px 42px, 42px 42px, auto, auto, auto;
       font-family: "Rajdhani", sans-serif;
+      position: relative;
+      overflow-x: hidden;
+    }
+    .stApp::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.015) 0%,
+        rgba(255,255,255,0.015) 48%,
+        rgba(0,0,0,0.0) 49%,
+        rgba(0,0,0,0.0) 100%
+      );
+      background-size: 100% 5px;
+      mix-blend-mode: screen;
+      opacity: 0.24;
+      animation: scan 7s linear infinite;
+      z-index: 0;
+    }
+    .stApp::after {
+      content: "";
+      position: fixed;
+      width: 380px;
+      height: 380px;
+      right: -120px;
+      top: -110px;
+      border-radius: 999px;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(0,217,232,0.23) 0%, rgba(0,217,232,0) 72%);
+      filter: blur(4px);
+      animation: pulse 4.4s ease-in-out infinite;
+      z-index: 0;
+    }
+    @keyframes scan {
+      0% {transform: translateY(-4px);}
+      100% {transform: translateY(4px);}
+    }
+    @keyframes pulse {
+      0%,100% {opacity: 0.35;}
+      50% {opacity: 0.68;}
     }
 
     #MainMenu, header[data-testid="stHeader"], footer {visibility: hidden;}
     [data-testid="stAppViewContainer"] {padding-top: 0.5rem;}
+    .block-container {position: relative; z-index: 1; max-width: 1400px;}
 
     .topbar {
       border: 1px solid rgba(113, 143, 183, 0.22);
@@ -80,14 +123,89 @@ st.markdown(
       font-family: "Orbitron", sans-serif;
     }
     .pill.active {color: var(--lime); border-color: rgba(156, 255, 58, 0.4);}
+    .status-right {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+    .loadbox {
+      min-width: 180px;
+      border-left: 1px solid rgba(113, 143, 183, 0.22);
+      border-right: 1px solid rgba(113, 143, 183, 0.22);
+      padding: 0 0.8rem;
+    }
+    .loadbox .label {
+      margin: 0;
+      font-size: 0.73rem;
+      font-family: "Orbitron", sans-serif;
+      letter-spacing: 1.2px;
+      color: #8ca5c9;
+      display: flex;
+      justify-content: space-between;
+    }
+    .loadbar {
+      height: 6px;
+      margin-top: 0.3rem;
+      border-radius: 999px;
+      background: rgba(140, 165, 201, 0.18);
+      overflow: hidden;
+    }
+    .loadbar span {
+      display: block;
+      height: 100%;
+      width: 42%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #9cff3a, #00d9e8);
+      animation: fill 3.2s ease-in-out infinite alternate;
+    }
+    @keyframes fill {
+      from {width: 37%;}
+      to {width: 49%;}
+    }
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: "Orbitron", sans-serif;
+      letter-spacing: 1px;
+    }
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 217, 232, 0.55);
+      background: radial-gradient(circle at 35% 30%, rgba(0,217,232,0.35), rgba(0,217,232,0.08) 60%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px rgba(0, 217, 232, 0.22);
+    }
+    .profile .meta {
+      margin: 0;
+      font-size: 0.72rem;
+      color: #8ca5c9;
+      line-height: 1.15;
+      text-transform: uppercase;
+    }
+    .profile .name {
+      margin: 0;
+      font-size: 0.82rem;
+      color: #f2f7ff;
+    }
 
     .hero {
       border: 1px solid rgba(113, 143, 183, 0.2);
       border-radius: 26px;
       background: linear-gradient(180deg, rgba(4, 14, 33, 0.92), rgba(3, 11, 26, 0.9));
-      padding: 1.3rem 1.4rem;
+      padding: 1.15rem 1.25rem;
       margin-bottom: 1.2rem;
       box-shadow: inset 0 1px 0 rgba(129, 160, 198, 0.2);
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 1rem;
+      align-items: center;
     }
     .sync {
       font-family: "Orbitron", sans-serif;
@@ -106,7 +224,7 @@ st.markdown(
     .hero-title span {color: var(--cyan);}
 
     .cmd-row {
-      display:flex; gap:0.7rem; flex-wrap:wrap; margin-top: 0.9rem;
+      display:flex; gap:0.7rem; flex-wrap:wrap; margin-top: 0.3rem; justify-content: flex-end;
     }
     .cmd {
       border: 1px solid rgba(105, 137, 175, 0.28);
@@ -122,6 +240,14 @@ st.markdown(
       color: var(--cyan);
       border-color: rgba(0, 217, 232, 0.55);
       box-shadow: 0 0 18px rgba(0, 217, 232, 0.18);
+    }
+    .panel-box {
+      border: 1px solid rgba(89, 120, 156, 0.28);
+      border-radius: 18px;
+      padding: 0.8rem 0.95rem 1rem;
+      background: linear-gradient(180deg, rgba(6, 18, 40, 0.72), rgba(3, 12, 28, 0.63));
+      margin: 0.25rem 0 1rem;
+      box-shadow: inset 0 0 0 1px rgba(7, 22, 44, 0.74);
     }
 
     .section-title {
@@ -206,6 +332,9 @@ st.markdown(
     @media (max-width: 900px) {
       .hero-title {font-size: 1.65rem;}
       .topbar {flex-direction: column; align-items: flex-start; gap: 0.6rem;}
+      .hero-grid {grid-template-columns: 1fr;}
+      .cmd-row {justify-content: flex-start;}
+      .status-right {width: 100%;}
     }
     </style>
     """,
@@ -379,16 +508,33 @@ st.markdown(
         <div class="pill">[ 0X-WATU-AUDIT ]</div>
         <div class="pill active">ACTIVE_NODE</div>
       </div>
+      <div class="status-right">
+        <div class="loadbox">
+          <p class="label"><span>NEURAL LOAD</span><span>4.2%</span></p>
+          <div class="loadbar"><span></span></div>
+        </div>
+        <div class="profile">
+          <div>
+            <p class="name">ADMIN_ROOT</p>
+            <p class="meta">REGIONAL HUB</p>
+          </div>
+          <div class="avatar">●</div>
+        </div>
+      </div>
     </div>
 
     <div class="hero">
-      <div class="sync">SYNCHRONIZED_ACTIVE</div>
-      <h2 class="hero-title">WATU DAILY <span>SALES</span></h2>
-      <div class="cmd-row">
-        <div class="cmd">ARCHIVES</div>
-        <div class="cmd">UPLINK NEW DATA</div>
-        <div class="cmd highlight">DISPATCH HUB</div>
-        <div class="cmd">ARCHIVE PDF</div>
+      <div class="hero-grid">
+        <div>
+          <div class="sync">SYNCHRONIZED_ACTIVE</div>
+          <h2 class="hero-title">WATU DAILY <span>SALES</span></h2>
+        </div>
+        <div class="cmd-row">
+          <div class="cmd">ARCHIVES</div>
+          <div class="cmd">UPLINK NEW DATA</div>
+          <div class="cmd highlight">DISPATCH HUB</div>
+          <div class="cmd">ARCHIVE PDF</div>
+        </div>
       </div>
     </div>
     """,
@@ -425,6 +571,7 @@ if prepared.empty:
 has_valid_dates = prepared["disbursed_date"].notna().any()
 
 st.markdown("### <span class='section-title'>FILTER MATRIX</span>", unsafe_allow_html=True)
+st.markdown("<div class='panel-box'>", unsafe_allow_html=True)
 left, right = st.columns([2, 3])
 filter_mode = left.selectbox("Report Period", ["All Dates", "This Week", "This Month", "Custom Range"])
 
@@ -455,6 +602,7 @@ if filter_mode == "Custom Range":
 if filter_mode in {"This Week", "This Month"} and not has_valid_dates:
     st.warning("No valid `disbursedon_date` values found. Showing all dates.")
     filter_mode = "All Dates"
+st.markdown("</div>", unsafe_allow_html=True)
 
 filtered = apply_date_filter(prepared, filter_mode, start_dt, end_dt)
 if filtered.empty:
@@ -485,6 +633,7 @@ with mc4:
     st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("### <span class='section-title'>EXPORT MATRIX</span>", unsafe_allow_html=True)
+st.markdown("<div class='panel-box'>", unsafe_allow_html=True)
 col_export1, col_export2 = st.columns([1, 1])
 col_export1.download_button(
     "EXPORT FULL REPORT (EXCEL)",
@@ -498,8 +647,10 @@ col_export2.download_button(
     file_name="filtered_mobile_device_data.csv",
     mime="text/csv",
 )
+st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("### <span class='section-title'>MARKET CONCENTRATION</span>", unsafe_allow_html=True)
+st.markdown("<div class='panel-box'>", unsafe_allow_html=True)
 tab1, tab2, tab3, tab4 = st.tabs(["Dealership", "Model", "Branch", "Detailed"])
 with tab1:
     show_report_section("Sales by Dealership", "sales_by_dealership", reports, "sales_by_dealership.csv")
@@ -509,9 +660,11 @@ with tab3:
     show_report_section("Sales by Branch", "sales_by_branch", reports, "sales_by_branch.csv")
 with tab4:
     show_report_section("Sales by Dealership + Model + Branch", "dealership_model_branch", reports, "sales_by_dealership_model_branch.csv")
+st.markdown("</div>", unsafe_allow_html=True)
 
 if "sales_by_month" in reports or "sales_by_week" in reports:
     st.markdown("### <span class='section-title'>TIME TRENDS</span>", unsafe_allow_html=True)
+    st.markdown("<div class='panel-box'>", unsafe_allow_html=True)
     time_col1, time_col2 = st.columns(2)
     if "sales_by_month" in reports:
         with time_col1:
@@ -519,3 +672,4 @@ if "sales_by_month" in reports or "sales_by_week" in reports:
     if "sales_by_week" in reports:
         with time_col2:
             show_report_section("Sales by Week", "sales_by_week", reports, "sales_by_week.csv")
+    st.markdown("</div>", unsafe_allow_html=True)
