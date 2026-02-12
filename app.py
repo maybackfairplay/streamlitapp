@@ -24,141 +24,183 @@ from reporting import (
     validate_required_columns,
 )
 
-st.set_page_config(page_title="Management Sales Report", page_icon="📈", layout="wide")
+st.set_page_config(page_title="Management Sales Report", page_icon="📊", layout="wide")
 
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
     :root {
-      --bg: #f4f7fc;
-      --surface: #ffffff;
-      --line: #e3e8f3;
-      --text: #111827;
-      --muted: #667085;
-      --brand: #1f5fd1;
-      --brand-2: #4c8dff;
-      --ink: #0b1220;
+      --bg: #eff1f3;
+      --panel: #ffffff;
+      --line: #d8dde3;
+      --text: #232b35;
+      --muted: #6e7782;
+      --teal: #0f7b6c;
+      --teal-soft: #d7ece8;
+      --warn: #c4492f;
     }
 
     .stApp {
-      background:
-        radial-gradient(1400px 360px at 12% -12%, rgba(76, 141, 255, 0.16), transparent 60%),
-        radial-gradient(1000px 280px at 88% -12%, rgba(31, 95, 209, 0.12), transparent 58%),
-        linear-gradient(180deg, #f8faff 0%, var(--bg) 58%);
+      background: var(--bg);
       color: var(--text);
-      font-family: "Plus Jakarta Sans", sans-serif;
+      font-family: "Inter", sans-serif;
     }
 
     .block-container {
-      max-width: 1400px;
-      padding-top: 1rem;
-      padding-bottom: 2.5rem;
+      max-width: 1500px;
+      padding-top: 0.7rem;
+      padding-bottom: 2rem;
     }
 
-    h1, h2, h3, h4, h5, h6, p, label {
-      font-family: "Plus Jakarta Sans", sans-serif !important;
-    }
-
-    .hero {
-      background: linear-gradient(120deg, #123a85 0%, #1f5fd1 58%, #4c8dff 100%);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 18px;
-      padding: 1.15rem 1.35rem;
-      color: #ffffff;
-      box-shadow: 0 16px 34px rgba(19, 58, 133, 0.28);
-      margin-bottom: 1rem;
-    }
-
-    .hero-title {
-      margin: 0;
-      font-size: 1.55rem;
-      font-weight: 800;
-      letter-spacing: -0.2px;
-    }
-
-    .hero-sub {
-      margin: 0.35rem 0 0;
-      color: #dce9ff;
-      font-size: 0.96rem;
-      font-weight: 500;
-    }
-
-    .badge-row {
+    .topbar {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0.75rem 1rem;
       display: flex;
-      gap: 0.5rem;
-      margin-top: 0.85rem;
-      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.8rem;
     }
 
-    .hero-badge {
-      background: rgba(255, 255, 255, 0.14);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 999px;
-      color: #e9f1ff;
-      font-size: 0.76rem;
-      padding: 0.22rem 0.62rem;
-      font-weight: 600;
-      letter-spacing: 0.2px;
-    }
-
-    .section-title {
-      margin-top: 0.1rem;
-      margin-bottom: 0.2rem;
-      font-size: 1.08rem;
+    .topbar h1 {
+      margin: 0;
+      font-size: 1.05rem;
       font-weight: 700;
-      color: var(--ink);
-      letter-spacing: -0.1px;
+      color: #1c2733;
+      letter-spacing: 0.1px;
     }
 
-    .section-sub {
-      margin-top: 0;
-      margin-bottom: 0.6rem;
+    .topbar p {
+      margin: 0.2rem 0 0;
       color: var(--muted);
-      font-size: 0.9rem;
+      font-size: 0.84rem;
+    }
+
+    .chip-row {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.24rem 0.62rem;
+      font-size: 0.75rem;
+      color: #3d4854;
+      background: #f7f9fb;
+      font-weight: 600;
+    }
+
+    .chip.active {
+      background: var(--teal-soft);
+      border-color: #b5d7d1;
+      color: #0b6458;
+    }
+
+    .kpi-highlight {
+      background: #176f63;
+      color: #ffffff;
+      border: 1px solid #155d54;
+      border-radius: 14px;
+      padding: 0.95rem 1rem;
+      min-height: 120px;
+    }
+
+    .kpi-highlight .label {
+      margin: 0;
+      opacity: 0.86;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .kpi-highlight .value {
+      margin: 0.42rem 0 0;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .kpi-highlight .sub {
+      margin: 0.42rem 0 0;
+      opacity: 0.9;
+      font-size: 0.8rem;
+    }
+
+    .section-header {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #212a36;
+    }
+
+    .section-note {
+      margin: 0.16rem 0 0.55rem;
+      color: var(--muted);
+      font-size: 0.84rem;
     }
 
     div[data-testid="stMetric"] {
-      background: var(--surface);
+      background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 0.85rem;
-      box-shadow: 0 5px 16px rgba(17, 24, 39, 0.045);
+      border-radius: 12px;
+      padding: 0.65rem;
+      box-shadow: none;
     }
 
     div[data-testid="stMetricLabel"] p {
-      color: #64748b !important;
+      color: #6f7a86 !important;
       text-transform: uppercase;
-      letter-spacing: 0.55px;
-      font-size: 0.76rem;
+      letter-spacing: 0.4px;
+      font-size: 0.72rem;
       font-weight: 700;
     }
 
     div[data-testid="stMetricValue"] {
-      color: #0f172a !important;
-      font-weight: 800;
-      font-size: 1.8rem;
+      color: #1f2937 !important;
+      font-weight: 700;
+      font-size: 1.65rem;
     }
 
     div[data-testid="stDataFrame"] {
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(17, 24, 39, 0.04);
+      background: #ffffff;
     }
 
     div[data-testid="stSidebar"] {
-      border-right: 1px solid #e8edf7;
+      border-right: 1px solid #d6dce4;
+      background: #f4f6f9;
     }
 
     button[kind="primary"] {
-      background: var(--brand) !important;
-      border-color: var(--brand) !important;
+      background: var(--teal) !important;
+      border-color: var(--teal) !important;
     }
 
-    button[kind="secondary"] {
-      border-color: #ccd6ea !important;
+    .stTabs [role="tab"] {
+      font-weight: 600;
+      font-size: 0.88rem;
+    }
+
+    .rail {
+      margin-top: 0.35rem;
+      padding: 0.65rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: #44515f;
+      font-size: 0.84rem;
+    }
+
+    .rail b {
+      color: #1f2c3a;
     }
     </style>
     """,
@@ -186,8 +228,8 @@ def get_auth_config() -> Dict[str, Dict[str, str]]:
 
 
 def section_header(title: str, subtitle: str) -> None:
-    st.markdown(f"<p class='section-title'>{title}</p>", unsafe_allow_html=True)
-    st.markdown(f"<p class='section-sub'>{subtitle}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p class='section-header'>{title}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p class='section-note'>{subtitle}</p>", unsafe_allow_html=True)
 
 
 def login_ui() -> Optional[str]:
@@ -231,7 +273,7 @@ def process_dataframe(df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, pd.Data
 
 def show_report_section(title: str, report_key: str, reports: Dict[str, pd.DataFrame], filename: str) -> None:
     st.subheader(title)
-    st.dataframe(reports[report_key], use_container_width=True, height=360)
+    st.dataframe(reports[report_key], use_container_width=True, height=340)
     st.download_button(
         f"Download {title} (CSV)",
         data=to_csv_download(reports[report_key]),
@@ -247,14 +289,16 @@ if role is None:
 
 st.markdown(
     """
-    <div class="hero">
-      <p class="hero-title">Management Sales Dashboard</p>
-      <p class="hero-sub">Real-time sales intelligence by dealership, model, branch, and period.</p>
-      <div class="badge-row">
-        <span class="hero-badge">CSV Uploader</span>
-        <span class="hero-badge">Data Quality Checks</span>
-        <span class="hero-badge">Excel + PDF Exports</span>
-        <span class="hero-badge">Role-Based Access</span>
+    <div class="topbar">
+      <div>
+        <h1>Sales Performance Workspace</h1>
+        <p>Enterprise view for dealership, branch, and model performance tracking.</p>
+      </div>
+      <div class="chip-row">
+        <span class="chip active">Status</span>
+        <span class="chip">Sales</span>
+        <span class="chip">Forecast</span>
+        <span class="chip">Requests</span>
       </div>
     </div>
     """,
@@ -262,6 +306,9 @@ st.markdown(
 )
 
 with st.sidebar:
+    st.header("Navigation")
+    st.markdown("<div class='rail'><b>Dashboard</b><br/>Sales Analytics<br/>Exports<br/>Settings</div>", unsafe_allow_html=True)
+
     st.header("Session")
     st.write(f"User: `{st.session_state.get('username')}`")
     st.write(f"Role: `{role}`")
@@ -284,7 +331,7 @@ with st.sidebar:
             st.rerun()
 
 with st.container(border=True):
-    section_header("Data Source", "Upload your latest CSV sales file.")
+    section_header("Data Source", "Upload your latest CSV extract.")
     uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 
 raw_df: Optional[pd.DataFrame] = None
@@ -332,16 +379,31 @@ if missing_columns:
 
 quality = data_quality_summary(df)
 with st.container(border=True):
-    section_header("Data Quality", "Quick validation summary of uploaded records.")
-    q1, q2, q3, q4 = st.columns(4)
-    q1.metric("Total Rows", quality.total_rows)
-    q2.metric("Mobile Rows", quality.mobile_rows)
-    q3.metric("Excluded", quality.excluded_non_mobile)
-    q4.metric("Duplicates", quality.duplicate_rows)
-    q5, q6, q7 = st.columns(3)
-    q5.metric("Invalid Dates", quality.invalid_dates)
-    q6.metric("Missing Dealership", quality.missing_dealership)
-    q7.metric("Missing Branch/Model", quality.missing_branch + quality.missing_model)
+    section_header("Key Sales Figures", "Summary of quality and inclusion checks.")
+
+    left_kpi, right_kpi = st.columns([3, 1])
+    with left_kpi:
+        q1, q2, q3, q4 = st.columns(4)
+        q1.metric("Total Rows", quality.total_rows)
+        q2.metric("Mobile Rows", quality.mobile_rows)
+        q3.metric("Excluded", quality.excluded_non_mobile)
+        q4.metric("Duplicates", quality.duplicate_rows)
+        q5, q6, q7 = st.columns(3)
+        q5.metric("Invalid Dates", quality.invalid_dates)
+        q6.metric("Missing Dealership", quality.missing_dealership)
+        q7.metric("Missing Branch/Model", quality.missing_branch + quality.missing_model)
+
+    with right_kpi:
+        st.markdown(
+            f"""
+            <div class="kpi-highlight">
+              <p class="label">Sold this period</p>
+              <p class="value">{quality.mobile_rows:,}</p>
+              <p class="sub">Eligible mobile device records</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 with st.status("Preparing analytics...", expanded=False) as status:
     status.write("Applying sales rules")
@@ -353,8 +415,9 @@ if prepared.empty:
     st.stop()
 
 with st.container(border=True):
-    section_header("Filters", "Refine data before generating reports and exports.")
+    section_header("Filters", "Choose period and business dimensions.")
     has_valid_dates = prepared["disbursed_date"].notna().any()
+
     col1, col2, col3 = st.columns(3)
     filter_mode = col1.selectbox("Report Period", ["All Dates", "This Week", "This Month", "Custom Range"])
 
@@ -403,7 +466,7 @@ reports = build_reports(filtered)
 comparison = compare_periods(filtered)
 
 with st.container(border=True):
-    section_header("Snapshot", "High-level KPIs for current filtered period.")
+    section_header("Snapshot", "Current period commercial health.")
     m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Total Units", int(len(filtered)))
     m2.metric("Dealerships", int(reports["sales_by_dealership"].shape[0]))
@@ -412,20 +475,20 @@ with st.container(border=True):
     m5.metric("Period Change", f"{comparison['pct_change']:.1f}%")
 
 with st.container(border=True):
-    section_header("Trends", "Weekly momentum and top branch contribution.")
+    section_header("Forecast and Trends", "Operational trend indicators.")
     c1, c2 = st.columns(2)
     with c1:
         if "sales_by_week" in reports:
             week_df = reports["sales_by_week"].rename(columns={"week_start": "period"}).set_index("period")
-            st.line_chart(week_df["sales_count"])
+            st.line_chart(week_df["sales_count"], color="#0f7b6c")
         else:
             st.info("Weekly trend unavailable (no valid dates).")
     with c2:
         branch_top = reports["sales_by_branch"].head(10).set_index("branch_office")
-        st.bar_chart(branch_top["sales_count"])
+        st.bar_chart(branch_top["sales_count"], color="#2a9d8f")
 
 with st.container(border=True):
-    section_header("Exports", "Download full reports and briefing files.")
+    section_header("Exports", "Distribute validated reporting outputs.")
     excel_bytes = to_excel_download(reports)
     pdf_bytes = to_pdf_download(reports, comparison, int(len(filtered)))
 
@@ -454,7 +517,7 @@ with st.container(border=True):
 
 if role == "admin":
     with st.container(border=True):
-        section_header("Email Report (Admin)", "Send the latest Excel report directly to stakeholders.")
+        section_header("Email Report (Admin)", "Send current report pack to stakeholders.")
         recipients_text = st.text_input("Recipients (comma-separated)", value="")
         email_subject = st.text_input(
             "Subject", value=f"Management Sales Report - {datetime.now().strftime('%Y-%m-%d')}"
@@ -486,7 +549,7 @@ if role == "admin":
                 st.error(msg + " | Configure SMTP_* env vars")
 
 with st.container(border=True):
-    section_header("Reports", "Detailed sales views by dealership, model, and branch.")
+    section_header("Detailed Reports", "Data-heavy breakdowns for operational review.")
     tab1, tab2, tab3, tab4 = st.tabs(["Dealership", "Model", "Branch", "Detailed"])
     with tab1:
         show_report_section("Sales by Dealership", "sales_by_dealership", reports, "sales_by_dealership.csv")
@@ -504,7 +567,7 @@ with st.container(border=True):
 
 if "sales_by_month" in reports or "sales_by_week" in reports:
     with st.container(border=True):
-        section_header("Time Reports", "Month-over-month and week-over-week sales summaries.")
+        section_header("Time Reports", "Month and week aggregated outputs.")
         t1, t2 = st.columns(2)
         if "sales_by_month" in reports:
             with t1:
