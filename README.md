@@ -1,23 +1,27 @@
 # Management Report App
 
-This app lets you upload a CSV and generate management sales reports.
+Modern Streamlit app for management sales reporting from CSV uploads.
 
-## Rules applied
-- Counts only rows where `type` is `Mobile device`.
-- Merges dealership names by using the text before the first comma.
-  - Example: `ABC Motors, North Zone` and `ABC Motors, East Zone` are counted as `ABC Motors`.
-- Supports report period filters using `disbursedon_date`:
+## Features
+- Filters only `type = Mobile device`.
+- Merges dealership names by text before the first comma.
+  - Example: `ABC Motors, North Zone` + `ABC Motors, East Zone` => `ABC Motors`
+- Date filtering using `disbursedon_date`:
   - All Dates
   - This Week
   - This Month
   - Custom Range
-- Shows sales by:
-  - Dealership
-  - Model
-  - Branch
-  - Dealership + Model + Branch (detailed)
-  - Month
-  - Week (Monday start)
+- Report tables:
+  - Sales by Dealership
+  - Sales by Model
+  - Sales by Branch
+  - Sales by Dealership + Model + Branch
+  - Sales by Month
+  - Sales by Week (Monday start)
+- Export options:
+  - CSV per report
+  - Full management report as one Excel file (multi-sheet)
+  - Filtered raw data CSV
 
 ## Expected source columns
 - `Client Mobile No`
