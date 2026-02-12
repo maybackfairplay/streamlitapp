@@ -10,8 +10,20 @@ st.set_page_config(page_title="Management Sales Report", layout="wide")
 st.markdown(
     """
     <style>
+    :root {
+      --app-text: #10243a;
+      --app-muted: #3f5974;
+      --app-border: #d8e5f3;
+    }
     .stApp {
       background: radial-gradient(circle at 10% 10%, #eaf4ff 0%, #f6f9fc 45%, #ffffff 100%);
+      color: var(--app-text);
+    }
+    .stApp, .stApp p, .stApp label, .stApp h1, .stApp h2, .stApp h3, .stApp h4 {
+      color: var(--app-text);
+    }
+    .stCaption, .stMarkdown small {
+      color: var(--app-muted) !important;
     }
     .hero {
       padding: 1rem 1.25rem;
@@ -32,7 +44,7 @@ st.markdown(
       font-size: 0.95rem;
     }
     .card {
-      border: 1px solid #d8e5f3;
+      border: 1px solid var(--app-border);
       border-radius: 12px;
       padding: 0.8rem 1rem;
       background: #ffffff;
@@ -40,9 +52,38 @@ st.markdown(
     }
     div[data-testid="stMetric"] {
       background: #ffffff;
-      border: 1px solid #d8e5f3;
+      border: 1px solid var(--app-border);
       border-radius: 12px;
       padding: 0.8rem;
+    }
+    div[data-testid="stMetricLabel"] p,
+    div[data-testid="stMetricValue"] {
+      color: var(--app-text) !important;
+    }
+    div[data-testid="stSelectbox"] label,
+    div[data-testid="stDateInput"] label,
+    div[data-testid="stFileUploader"] label {
+      color: var(--app-text) !important;
+      font-weight: 600;
+    }
+    button[kind="secondary"] {
+      background: #0f2338 !important;
+      color: #ffffff !important;
+      border: 1px solid #0f2338 !important;
+    }
+    button[kind="secondary"]:hover {
+      background: #17314d !important;
+      border-color: #17314d !important;
+    }
+    .stTabs [role="tab"] {
+      color: var(--app-muted) !important;
+    }
+    .stTabs [aria-selected="true"] {
+      color: #0f406f !important;
+      font-weight: 700;
+    }
+    div[data-testid="stDataFrame"] * {
+      color: var(--app-text);
     }
     </style>
     """,
