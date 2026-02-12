@@ -24,88 +24,141 @@ from reporting import (
     validate_required_columns,
 )
 
-st.set_page_config(page_title="Management Sales Report", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Management Sales Report", page_icon="📈", layout="wide")
 
 st.markdown(
     """
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
     :root {
-      --bg: #f5f7fb;
-      --card: #ffffff;
-      --border: #e6e9f0;
-      --text: #101828;
+      --bg: #f4f7fc;
+      --surface: #ffffff;
+      --line: #e3e8f3;
+      --text: #111827;
       --muted: #667085;
-      --brand: #1250a8;
-      --brand-soft: #eaf2ff;
+      --brand: #1f5fd1;
+      --brand-2: #4c8dff;
+      --ink: #0b1220;
     }
+
     .stApp {
-      background: linear-gradient(180deg, #f7f9fc 0%, #f3f6fb 100%);
+      background:
+        radial-gradient(1400px 360px at 12% -12%, rgba(76, 141, 255, 0.16), transparent 60%),
+        radial-gradient(1000px 280px at 88% -12%, rgba(31, 95, 209, 0.12), transparent 58%),
+        linear-gradient(180deg, #f8faff 0%, var(--bg) 58%);
       color: var(--text);
+      font-family: "Plus Jakarta Sans", sans-serif;
     }
+
     .block-container {
-      max-width: 1380px;
-      padding-top: 1.25rem;
+      max-width: 1400px;
+      padding-top: 1rem;
       padding-bottom: 2.5rem;
     }
-    .hero {
-      background: linear-gradient(120deg, #0f376f 0%, #1b5bb0 60%, #3e7dd6 100%);
-      border-radius: 16px;
-      padding: 1.2rem 1.35rem;
-      color: #ffffff;
-      margin-bottom: 1rem;
-      box-shadow: 0 10px 22px rgba(16, 55, 111, 0.25);
+
+    h1, h2, h3, h4, h5, h6, p, label {
+      font-family: "Plus Jakarta Sans", sans-serif !important;
     }
-    .hero h1 {
+
+    .hero {
+      background: linear-gradient(120deg, #123a85 0%, #1f5fd1 58%, #4c8dff 100%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 18px;
+      padding: 1.15rem 1.35rem;
+      color: #ffffff;
+      box-shadow: 0 16px 34px rgba(19, 58, 133, 0.28);
+      margin-bottom: 1rem;
+    }
+
+    .hero-title {
       margin: 0;
       font-size: 1.55rem;
-      font-weight: 700;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+    }
+
+    .hero-sub {
+      margin: 0.35rem 0 0;
+      color: #dce9ff;
+      font-size: 0.96rem;
+      font-weight: 500;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-badge {
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      color: #e9f1ff;
+      font-size: 0.76rem;
+      padding: 0.22rem 0.62rem;
+      font-weight: 600;
       letter-spacing: 0.2px;
     }
-    .hero p {
-      margin: 0.35rem 0 0;
-      color: #dbe8ff;
-      font-size: 0.95rem;
-    }
+
     .section-title {
-      margin: 0.25rem 0 0.55rem;
-      color: #0f1728;
-      font-size: 1.05rem;
+      margin-top: 0.1rem;
+      margin-bottom: 0.2rem;
+      font-size: 1.08rem;
       font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.1px;
     }
-    .subtle {
+
+    .section-sub {
+      margin-top: 0;
+      margin-bottom: 0.6rem;
       color: var(--muted);
       font-size: 0.9rem;
-      margin-bottom: 0.35rem;
     }
+
     div[data-testid="stMetric"] {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0.85rem;
+      box-shadow: 0 5px 16px rgba(17, 24, 39, 0.045);
     }
+
     div[data-testid="stMetricLabel"] p {
-      color: #667085 !important;
-      font-size: 0.8rem;
+      color: #64748b !important;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-weight: 600;
-    }
-    div[data-testid="stMetricValue"] {
-      color: #101828 !important;
-      font-size: 1.8rem;
+      letter-spacing: 0.55px;
+      font-size: 0.76rem;
       font-weight: 700;
     }
+
+    div[data-testid="stMetricValue"] {
+      color: #0f172a !important;
+      font-weight: 800;
+      font-size: 1.8rem;
+    }
+
     div[data-testid="stDataFrame"] {
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       border-radius: 12px;
       overflow: hidden;
+      box-shadow: 0 4px 12px rgba(17, 24, 39, 0.04);
     }
+
     div[data-testid="stSidebar"] {
-      border-right: 1px solid #e6e9f0;
+      border-right: 1px solid #e8edf7;
     }
+
     button[kind="primary"] {
-      background: #1250a8 !important;
-      border-color: #1250a8 !important;
+      background: var(--brand) !important;
+      border-color: var(--brand) !important;
+    }
+
+    button[kind="secondary"] {
+      border-color: #ccd6ea !important;
     }
     </style>
     """,
@@ -132,15 +185,20 @@ def get_auth_config() -> Dict[str, Dict[str, str]]:
     return users
 
 
+def section_header(title: str, subtitle: str) -> None:
+    st.markdown(f"<p class='section-title'>{title}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p class='section-sub'>{subtitle}</p>", unsafe_allow_html=True)
+
+
 def login_ui() -> Optional[str]:
     users = get_auth_config()
     if st.session_state.get("authenticated"):
         return st.session_state.get("role")
 
-    left, center, right = st.columns([1, 1.2, 1])
+    left, center, right = st.columns([1, 1.1, 1])
     with center:
         st.markdown("## Management Sales Report")
-        st.markdown("Login to continue")
+        st.caption("Sign in to continue")
         with st.form("login_form", border=True):
             username = st.text_input("Username")
             password = st.text_input("Password", type="password")
@@ -156,7 +214,6 @@ def login_ui() -> Optional[str]:
             st.error("Invalid username or password")
 
         st.caption("Demo credentials: admin/admin123 or viewer/viewer123")
-
     return None
 
 
@@ -173,7 +230,7 @@ def process_dataframe(df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, pd.Data
 
 
 def show_report_section(title: str, report_key: str, reports: Dict[str, pd.DataFrame], filename: str) -> None:
-    st.markdown(f"<div class='section-title'>{title}</div>", unsafe_allow_html=True)
+    st.subheader(title)
     st.dataframe(reports[report_key], use_container_width=True, height=360)
     st.download_button(
         f"Download {title} (CSV)",
@@ -191,15 +248,21 @@ if role is None:
 st.markdown(
     """
     <div class="hero">
-      <h1>Management Sales Dashboard</h1>
-      <p>Upload CSV, filter by dealership/branch/model/date, and export management-ready reports.</p>
+      <p class="hero-title">Management Sales Dashboard</p>
+      <p class="hero-sub">Real-time sales intelligence by dealership, model, branch, and period.</p>
+      <div class="badge-row">
+        <span class="hero-badge">CSV Uploader</span>
+        <span class="hero-badge">Data Quality Checks</span>
+        <span class="hero-badge">Excel + PDF Exports</span>
+        <span class="hero-badge">Role-Based Access</span>
+      </div>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
 with st.sidebar:
-    st.markdown("### Session")
+    st.header("Session")
     st.write(f"User: `{st.session_state.get('username')}`")
     st.write(f"Role: `{role}`")
     if st.button("Logout", use_container_width=True):
@@ -207,7 +270,7 @@ with st.sidebar:
             st.session_state.pop(k, None)
         st.rerun()
 
-    st.markdown("### Upload History")
+    st.header("Upload History")
     history = load_upload_history()
     options = [f"{h['timestamp']} | {h['original_name']} ({h['rows']} rows)" for h in history]
     selected_idx = st.selectbox("Reopen previous upload", options=(['None'] + options), index=0)
@@ -221,7 +284,7 @@ with st.sidebar:
             st.rerun()
 
 with st.container(border=True):
-    st.markdown("<div class='section-title'>Data Source</div>", unsafe_allow_html=True)
+    section_header("Data Source", "Upload your latest CSV sales file.")
     uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 
 raw_df: Optional[pd.DataFrame] = None
@@ -269,7 +332,7 @@ if missing_columns:
 
 quality = data_quality_summary(df)
 with st.container(border=True):
-    st.markdown("<div class='section-title'>Data Quality</div>", unsafe_allow_html=True)
+    section_header("Data Quality", "Quick validation summary of uploaded records.")
     q1, q2, q3, q4 = st.columns(4)
     q1.metric("Total Rows", quality.total_rows)
     q2.metric("Mobile Rows", quality.mobile_rows)
@@ -290,9 +353,7 @@ if prepared.empty:
     st.stop()
 
 with st.container(border=True):
-    st.markdown("<div class='section-title'>Filters</div>", unsafe_allow_html=True)
-    st.markdown("<div class='subtle'>Refine your management view before export.</div>", unsafe_allow_html=True)
-
+    section_header("Filters", "Refine data before generating reports and exports.")
     has_valid_dates = prepared["disbursed_date"].notna().any()
     col1, col2, col3 = st.columns(3)
     filter_mode = col1.selectbox("Report Period", ["All Dates", "This Week", "This Month", "Custom Range"])
@@ -342,7 +403,7 @@ reports = build_reports(filtered)
 comparison = compare_periods(filtered)
 
 with st.container(border=True):
-    st.markdown("<div class='section-title'>Snapshot</div>", unsafe_allow_html=True)
+    section_header("Snapshot", "High-level KPIs for current filtered period.")
     m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Total Units", int(len(filtered)))
     m2.metric("Dealerships", int(reports["sales_by_dealership"].shape[0]))
@@ -351,7 +412,7 @@ with st.container(border=True):
     m5.metric("Period Change", f"{comparison['pct_change']:.1f}%")
 
 with st.container(border=True):
-    st.markdown("<div class='section-title'>Trends</div>", unsafe_allow_html=True)
+    section_header("Trends", "Weekly momentum and top branch contribution.")
     c1, c2 = st.columns(2)
     with c1:
         if "sales_by_week" in reports:
@@ -364,7 +425,7 @@ with st.container(border=True):
         st.bar_chart(branch_top["sales_count"])
 
 with st.container(border=True):
-    st.markdown("<div class='section-title'>Exports</div>", unsafe_allow_html=True)
+    section_header("Exports", "Download full reports and briefing files.")
     excel_bytes = to_excel_download(reports)
     pdf_bytes = to_pdf_download(reports, comparison, int(len(filtered)))
 
@@ -393,7 +454,7 @@ with st.container(border=True):
 
 if role == "admin":
     with st.container(border=True):
-        st.markdown("<div class='section-title'>Email Report (Admin)</div>", unsafe_allow_html=True)
+        section_header("Email Report (Admin)", "Send the latest Excel report directly to stakeholders.")
         recipients_text = st.text_input("Recipients (comma-separated)", value="")
         email_subject = st.text_input(
             "Subject", value=f"Management Sales Report - {datetime.now().strftime('%Y-%m-%d')}"
@@ -425,7 +486,7 @@ if role == "admin":
                 st.error(msg + " | Configure SMTP_* env vars")
 
 with st.container(border=True):
-    st.markdown("<div class='section-title'>Reports</div>", unsafe_allow_html=True)
+    section_header("Reports", "Detailed sales views by dealership, model, and branch.")
     tab1, tab2, tab3, tab4 = st.tabs(["Dealership", "Model", "Branch", "Detailed"])
     with tab1:
         show_report_section("Sales by Dealership", "sales_by_dealership", reports, "sales_by_dealership.csv")
@@ -443,7 +504,7 @@ with st.container(border=True):
 
 if "sales_by_month" in reports or "sales_by_week" in reports:
     with st.container(border=True):
-        st.markdown("<div class='section-title'>Time Reports</div>", unsafe_allow_html=True)
+        section_header("Time Reports", "Month-over-month and week-over-week sales summaries.")
         t1, t2 = st.columns(2)
         if "sales_by_month" in reports:
             with t1:
