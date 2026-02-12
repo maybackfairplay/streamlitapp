@@ -1,0 +1,6 @@
+Client Mobile No,Branch Office,Dealership,disbursedon_date,registration_no,chasis_no,make,model,type
+9990001111,North,ABC Motors,2026-01-03,REG1,CH1,Samsung,S23,Mobile device
+9990001112,North,"ABC Motors, Zone 2",2026-01-04,REG2,CH2,Samsung,S23,Mobile device
+9990001113,South,XYZ Auto,2026-01-05,REG3,CH3,Apple,iPhone 15,Mobile device
+9990001114,South,XYZ Auto,2026-01-05,REG4,CH4,Nokia,G42,Accessory
+9990001115,West,LMN Deals,2026-01-07,REG5,CH5,Apple,iPhone 15,Mobile device

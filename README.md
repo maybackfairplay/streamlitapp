@@ -1,27 +1,31 @@
 # Management Report App
 
-Modern Streamlit app for management sales reporting from CSV uploads.
+Cyber-styled Streamlit app for management sales reporting from CSV uploads.
 
-## Features
-- Filters only `type = Mobile device`.
-- Merges dealership names by text before the first comma.
-  - Example: `ABC Motors, North Zone` + `ABC Motors, East Zone` => `ABC Motors`
-- Date filtering using `disbursedon_date`:
-  - All Dates
-  - This Week
-  - This Month
-  - Custom Range
-- Report tables:
-  - Sales by Dealership
-  - Sales by Model
-  - Sales by Branch
-  - Sales by Dealership + Model + Branch
-  - Sales by Month
-  - Sales by Week (Monday start)
-- Export options:
-  - CSV per report
-  - Full management report as one Excel file (multi-sheet)
-  - Filtered raw data CSV
+## Implemented Enhancements
+1. Data quality checks panel (invalid dates, missing values, duplicates, excluded rows)
+2. Drill-down filters (dealership, branch, model, make + date period)
+3. Trend visuals (weekly line + top-branch bar)
+4. Comparison mode (current vs previous period KPI)
+5. Scheduled email dispatch support (SMTP env vars)
+6. PDF briefing export
+7. Upload history with reopen capability
+8. Performance/reliability improvements (`st.cache_data`, status feedback, safer errors)
+9. Security and access (login + role-based control: `admin`, `viewer`)
+10. Deployment hardening (pinned dependencies + sample CSV + tests)
+
+## Login
+Default credentials (change via env/secrets):
+- `admin / admin123`
+- `viewer / viewer123`
+
+## SMTP (for email reports)
+Set environment variables:
+- `SMTP_HOST`
+- `SMTP_PORT` (default `587`)
+- `SMTP_USER`
+- `SMTP_PASSWORD`
+- `SMTP_SENDER`
 
 ## Expected source columns
 - `Client Mobile No`
@@ -34,8 +38,6 @@ Modern Streamlit app for management sales reporting from CSV uploads.
 - `model`
 - `type`
 
-The app normalizes header formatting (spaces/underscores/case), so small differences are accepted.
-
 ## Run locally
 ```bash
 cd /Users/dembsdesign/Documents/management-report-app
@@ -43,4 +45,10 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 streamlit run app.py
+```
+
+## Run tests
+```bash
+pip install -r requirements-dev.txt
+pytest
 ```
