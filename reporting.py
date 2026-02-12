@@ -8,6 +8,7 @@ from datetime import date, datetime
 from io import BytesIO, StringIO
 from typing import Dict, List, Optional, Tuple
 
+import numpy as np
 import pandas as pd
 
 CANONICAL_COLUMNS = {
@@ -27,6 +28,8 @@ REQUIRED_FOR_REPORT = ["branch_office", "dealership", "model", "type"]
 APPDATA_DIR = ".appdata"
 UPLOADS_DIR = os.path.join(APPDATA_DIR, "uploads")
 HISTORY_FILE = os.path.join(APPDATA_DIR, "upload_history.json")
+PRESETS_FILE = os.path.join(APPDATA_DIR, "filter_presets.json")
+AUDIT_FILE = os.path.join(APPDATA_DIR, "audit_log.json")
 
 
 @dataclass
@@ -313,6 +316,12 @@ def ensure_storage() -> None:
     if not os.path.exists(HISTORY_FILE):
         with open(HISTORY_FILE, "w", encoding="utf-8") as f:
             json.dump([], f)
+    if not os.path.exists(PRESETS_FILE):
+        with open(PRESETS_FILE, "w", encoding="utf-8") as f:
+            json.dump([], f)
+    if not os.path.exists(AUDIT_FILE):
+        with open(AUDIT_FILE, "w", encoding="utf-8") as f:
+            json.dump([], f)
 
 
 def _read_history() -> List[dict]:
@@ -362,6 +371,56 @@ def load_upload_history() -> List[dict]:
     return _read_history()
 
 
+def load_filter_presets() -> List[dict]:
+    ensure_storage()
+    with open(PRESETS_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_filter_preset(name: str, user: str, payload: dict) -> None:
+    ensure_storage()
+    presets = load_filter_presets()
+    preset = {
+        "id": hashlib.sha1(f"{name}_{user}_{datetime.now().isoformat()}".encode("utf-8")).hexdigest()[:10],
+        "name": name,
+        "user": user,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "payload": payload,
+    }
+    presets.insert(0, preset)
+    with open(PRESETS_FILE, "w", encoding="utf-8") as f:
+        json.dump(presets[:100], f, indent=2)
+
+
+def delete_filter_preset(preset_id: str) -> None:
+    presets = [p for p in load_filter_presets() if p.get("id") != preset_id]
+    with open(PRESETS_FILE, "w", encoding="utf-8") as f:
+        json.dump(presets, f, indent=2)
+
+
+def log_audit_event(user: str, action: str, details: dict) -> None:
+    ensure_storage()
+    with open(AUDIT_FILE, "r", encoding="utf-8") as f:
+        items = json.load(f)
+    items.insert(
+        0,
+        {
+            "ts": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "user": user,
+            "action": action,
+            "details": details,
+        },
+    )
+    with open(AUDIT_FILE, "w", encoding="utf-8") as f:
+        json.dump(items[:300], f, indent=2)
+
+
+def load_audit_log() -> List[dict]:
+    ensure_storage()
+    with open(AUDIT_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
 def load_snapshot_df(saved_name: str) -> pd.DataFrame:
     path = os.path.join(UPLOADS_DIR, saved_name)
     return pd.read_csv(path, dtype=str)
@@ -405,3 +464,243 @@ def send_email_report(
         return True, "Email sent successfully."
     except Exception as exc:
         return False, f"Email failed: {exc}"
+
+
+def data_dictionary() -> pd.DataFrame:
+    rows = [
+        ("Client Mobile No", "Text", "Customer contact number", "optional"),
+        ("Branch Office", "Text", "Branch/office name", "required"),
+        ("Dealership", "Text", "Dealer name (text before comma is grouped)", "required"),
+        ("disbursedon_date", "Date", "Disbursal date", "recommended"),
+        ("registration_no", "Text", "Registration number", "optional"),
+        ("chasis_no", "Text", "Chassis number", "optional"),
+        ("make", "Text", "Manufacturer", "optional"),
+        ("model", "Text", "Product model", "required"),
+        ("type", "Text", "Only 'Mobile device' rows are counted", "required"),
+    ]
+    return pd.DataFrame(rows, columns=["column", "type", "description", "rule"])
+
+
+def detect_anomalies(df: pd.DataFrame) -> pd.DataFrame:
+    dated = df[df["disbursed_date"].notna()].copy()
+    if dated.empty:
+        return pd.DataFrame(columns=["period", "sales_count", "zscore", "severity"])
+
+    weekly = (
+        dated.assign(period=dated["disbursed_date"].dt.to_period("W").astype(str))
+        .groupby("period")
+        .size()
+        .reset_index(name="sales_count")
+    )
+    if weekly.shape[0] < 3:
+        return pd.DataFrame(columns=["period", "sales_count", "zscore", "severity"])
+
+    mean = weekly["sales_count"].mean()
+    std = weekly["sales_count"].std(ddof=0)
+    if std == 0:
+        return pd.DataFrame(columns=["period", "sales_count", "zscore", "severity"])
+
+    weekly["zscore"] = (weekly["sales_count"] - mean) / std
+    out = weekly[weekly["zscore"].abs() >= 1.8].copy()
+    out["severity"] = np.where(out["zscore"].abs() >= 2.5, "high", "medium")
+    return out.sort_values("zscore", ascending=False)
+
+
+def forecast_sales(df: pd.DataFrame, by: str = "dealership", periods: int = 3) -> pd.DataFrame:
+    if by not in {"dealership", "branch_office", "model"}:
+        by = "dealership"
+
+    dated = df[df["disbursed_date"].notna()].copy()
+    if dated.empty:
+        return pd.DataFrame(columns=[by, "forecast_next_period"])
+
+    dated["period"] = dated["disbursed_date"].dt.to_period("M")
+    grouped = dated.groupby([by, "period"]).size().reset_index(name="sales_count")
+    results = []
+
+    for key, g in grouped.groupby(by):
+        g = g.sort_values("period")
+        y = g["sales_count"].to_numpy(dtype=float)
+        x = np.arange(len(y), dtype=float)
+        if len(y) == 1:
+            pred = y[-1]
+        else:
+            slope, intercept = np.polyfit(x, y, 1)
+            pred = intercept + slope * (len(y) + periods - 1)
+        results.append({by: key, "forecast_next_period": max(round(float(pred)), 0)})
+
+    return pd.DataFrame(results).sort_values("forecast_next_period", ascending=False)
+
+
+def auto_insights(reports: Dict[str, pd.DataFrame], comparison: Dict[str, float], quality: DataQuality) -> List[str]:
+    insights: List[str] = []
+    if "sales_by_dealership" in reports and not reports["sales_by_dealership"].empty:
+        top = reports["sales_by_dealership"].iloc[0]
+        insights.append(f"Top dealership is {top['dealership']} with {int(top['sales_count'])} sales.")
+    if "sales_by_branch" in reports and not reports["sales_by_branch"].empty:
+        top = reports["sales_by_branch"].iloc[0]
+        insights.append(f"Highest volume branch is {top['branch_office']} ({int(top['sales_count'])} sales).")
+    if "sales_by_model" in reports and not reports["sales_by_model"].empty:
+        top = reports["sales_by_model"].iloc[0]
+        insights.append(f"Best performing model is {top['model']} with {int(top['sales_count'])} units.")
+    insights.append(f"Period-over-period movement is {comparison['pct_change']:.1f}%.")
+    if quality.duplicate_rows > 0 or quality.invalid_dates > 0:
+        insights.append(
+            f"Data quality risk: {quality.duplicate_rows} duplicate rows and {quality.invalid_dates} invalid dates."
+        )
+    return insights
+
+
+def root_cause_suggestions(df: pd.DataFrame) -> List[str]:
+    suggestions: List[str] = []
+    comp = compare_periods(df)
+    if comp["pct_change"] < 0:
+        suggestions.append("Decline detected: review branch-wise contribution for underperforming locations.")
+        suggestions.append("Check model mix shift: lower share of high-volume models can reduce totals.")
+        suggestions.append("Inspect date coverage and delayed disbursals in current period.")
+    else:
+        suggestions.append("Growth is positive: replicate top-branch playbook across low-performing branches.")
+        suggestions.append("Prioritize inventory for high-conversion models to sustain trend.")
+    return suggestions
+
+
+def smart_alerts(
+    reports: Dict[str, pd.DataFrame], quality: DataQuality, comparison: Dict[str, float], drop_threshold_pct: float = -10.0
+) -> List[dict]:
+    alerts: List[dict] = []
+    if comparison["pct_change"] <= drop_threshold_pct:
+        alerts.append({"level": "high", "message": f"Sales dropped {comparison['pct_change']:.1f}% vs previous period."})
+    if quality.invalid_dates > 0:
+        alerts.append({"level": "medium", "message": f"{quality.invalid_dates} rows have invalid disbursed dates."})
+    if quality.duplicate_rows > 0:
+        alerts.append({"level": "medium", "message": f"{quality.duplicate_rows} duplicate records detected."})
+    if "sales_by_branch" in reports and not reports["sales_by_branch"].empty:
+        total = reports["sales_by_branch"]["sales_count"].sum()
+        top = reports["sales_by_branch"].iloc[0]
+        if total > 0 and (top["sales_count"] / total) > 0.5:
+            alerts.append(
+                {
+                    "level": "low",
+                    "message": f"Concentration risk: {top['branch_office']} contributes over 50% of sales.",
+                }
+            )
+    return alerts
+
+
+def cleaning_assistant(df: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+    issues = []
+    if "dealership" in df.columns:
+        raw = df["dealership"].astype(str)
+        normalized = raw.str.split(",").str[0].str.strip().str.lower()
+        mapping = pd.DataFrame({"raw": raw, "normalized": normalized}).drop_duplicates()
+        suggestions = mapping[mapping["raw"].str.lower() != mapping["normalized"]]
+    else:
+        suggestions = pd.DataFrame(columns=["raw", "normalized"])
+
+    if "disbursedon_date" in df.columns:
+        parsed = pd.to_datetime(df["disbursedon_date"], errors="coerce")
+        bad_dates = df[parsed.isna()].head(50)
+        if not bad_dates.empty:
+            issues.append(("invalid_date", bad_dates))
+
+    dupes = df[df.duplicated()].head(50)
+    if not dupes.empty:
+        issues.append(("duplicates", dupes))
+
+    issue_rows = []
+    for issue_type, issue_df in issues:
+        issue_rows.append({"issue": issue_type, "count": int(issue_df.shape[0])})
+    summary = pd.DataFrame(issue_rows, columns=["issue", "count"])
+
+    return {"summary": summary, "dealership_suggestions": suggestions.head(200)}
+
+
+def target_vs_actual(df: pd.DataFrame, targets_df: pd.DataFrame) -> pd.DataFrame:
+    required = {"dealership", "branch_office", "target_sales"}
+    if not required.issubset(set(targets_df.columns)):
+        return pd.DataFrame(columns=["dealership", "branch_office", "target_sales", "actual_sales", "achievement_pct"])
+
+    actual = (
+        df.groupby(["dealership", "branch_office"])
+        .size()
+        .reset_index(name="actual_sales")
+    )
+    merged = targets_df.copy()
+    merged["target_sales"] = pd.to_numeric(merged["target_sales"], errors="coerce").fillna(0)
+    merged = merged.merge(actual, on=["dealership", "branch_office"], how="left")
+    merged["actual_sales"] = merged["actual_sales"].fillna(0)
+    merged["achievement_pct"] = np.where(
+        merged["target_sales"] > 0,
+        (merged["actual_sales"] / merged["target_sales"]) * 100,
+        0,
+    )
+    return merged.sort_values("achievement_pct", ascending=False)
+
+
+def recommend_targets(df: pd.DataFrame) -> pd.DataFrame:
+    fc = forecast_sales(df, by="dealership", periods=1)
+    if fc.empty:
+        return pd.DataFrame(columns=["dealership", "recommended_target"])
+    fc["recommended_target"] = (fc["forecast_next_period"] * 1.08).round().astype(int)
+    return fc[["dealership", "recommended_target"]].sort_values("recommended_target", ascending=False)
+
+
+def nl_qa(question: str, df: pd.DataFrame, reports: Dict[str, pd.DataFrame]) -> str:
+    q = question.strip().lower()
+    if not q:
+        return "Ask a question like: Which branch has highest sales this month?"
+
+    if "top dealership" in q or "highest dealership" in q:
+        top = reports["sales_by_dealership"].iloc[0]
+        return f"Top dealership is {top['dealership']} with {int(top['sales_count'])} sales."
+
+    if "top branch" in q or "highest branch" in q:
+        top = reports["sales_by_branch"].iloc[0]
+        return f"Top branch is {top['branch_office']} with {int(top['sales_count'])} sales."
+
+    if "top model" in q or "highest model" in q:
+        top = reports["sales_by_model"].iloc[0]
+        return f"Top model is {top['model']} with {int(top['sales_count'])} sales."
+
+    if "total sales" in q or "how many sales" in q:
+        return f"Total sales in current view: {int(len(df))}."
+
+    if "drop" in q or "decline" in q:
+        comp = compare_periods(df)
+        return f"Period change is {comp['pct_change']:.1f}% ({int(comp['current'])} vs {int(comp['previous'])})."
+
+    return (
+        "I can answer: top dealership, top branch, top model, total sales, or period decline. "
+        "Try: 'Which is the top branch?'"
+    )
+
+
+def generate_narrative(
+    reports: Dict[str, pd.DataFrame], comparison: Dict[str, float], alerts: List[dict], insights: List[str]
+) -> str:
+    lines = ["Executive Summary", ""]
+    lines.append(f"- Period-over-period performance: {comparison['pct_change']:.1f}%.")
+    lines.extend([f"- {ins}" for ins in insights[:4]])
+    if alerts:
+        lines.append("")
+        lines.append("Risk Alerts")
+        lines.extend([f"- [{a['level'].upper()}] {a['message']}" for a in alerts[:5]])
+    return "\n".join(lines)
+
+
+def what_if_simulation(base_total: int, dealership_uplift_pct: float, branch_uplift_pct: float) -> Dict[str, float]:
+    effect = 1 + (dealership_uplift_pct / 100.0) + (branch_uplift_pct / 100.0)
+    projected = max(int(round(base_total * effect)), 0)
+    return {
+        "base_total": float(base_total),
+        "projected_total": float(projected),
+        "delta": float(projected - base_total),
+    }
+
+
+def schedule_report_helper(frequency: str, day: str, time_24h: str, recipients: List[str]) -> str:
+    recipient_str = ", ".join(recipients) if recipients else "no recipients provided"
+    return (
+        f"Suggested schedule: {frequency} on {day} at {time_24h}. "
+        f"Send to: {recipient_str}. Configure with your scheduler/automation runtime."
+    )

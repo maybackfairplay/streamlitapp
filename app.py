@@ -8,20 +8,38 @@ import streamlit as st
 
 from reporting import (
     apply_date_filter,
+    auto_insights,
     build_reports,
+    cleaning_assistant,
     compare_periods,
+    data_dictionary,
     data_quality_summary,
+    delete_filter_preset,
+    detect_anomalies,
     filter_data,
+    forecast_sales,
+    generate_narrative,
+    load_audit_log,
+    load_filter_presets,
     load_snapshot_df,
     load_upload_history,
+    log_audit_event,
     map_columns,
+    nl_qa,
     prepare_data,
+    recommend_targets,
+    root_cause_suggestions,
+    save_filter_preset,
     save_upload_snapshot,
+    schedule_report_helper,
     send_email_report,
+    smart_alerts,
+    target_vs_actual,
     to_csv_download,
     to_excel_download,
     to_pdf_download,
     validate_required_columns,
+    what_if_simulation,
 )
 
 st.set_page_config(page_title="Management Sales Report", page_icon="📊", layout="wide")
@@ -30,178 +48,19 @@ st.markdown(
     """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-    :root {
-      --bg: #eff1f3;
-      --panel: #ffffff;
-      --line: #d8dde3;
-      --text: #232b35;
-      --muted: #6e7782;
-      --teal: #0f7b6c;
-      --teal-soft: #d7ece8;
-      --warn: #c4492f;
-    }
-
-    .stApp {
-      background: var(--bg);
-      color: var(--text);
-      font-family: "Inter", sans-serif;
-    }
-
-    .block-container {
-      max-width: 1500px;
-      padding-top: 0.45rem;
-      padding-bottom: 1.2rem;
-    }
-
-    .topbar {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 0.55rem 0.8rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.5rem;
-    }
-
-    .topbar h1 {
-      margin: 0;
-      font-size: 0.98rem;
-      font-weight: 700;
-      color: #1c2733;
-      letter-spacing: 0.1px;
-    }
-
-    .topbar p {
-      margin: 0.12rem 0 0;
-      color: var(--muted);
-      font-size: 0.78rem;
-    }
-
-    .chip-row {
-      display: flex;
-      gap: 0.35rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .chip {
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 0.18rem 0.54rem;
-      font-size: 0.7rem;
-      color: #3d4854;
-      background: #f7f9fb;
-      font-weight: 600;
-    }
-
-    .chip.active {
-      background: var(--teal-soft);
-      border-color: #b5d7d1;
-      color: #0b6458;
-    }
-
-    .kpi-highlight {
-      background: #176f63;
-      color: #ffffff;
-      border: 1px solid #155d54;
-      border-radius: 10px;
-      padding: 0.72rem 0.8rem;
-      min-height: 98px;
-    }
-
-    .kpi-highlight .label {
-      margin: 0;
-      opacity: 0.86;
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-    }
-
-    .kpi-highlight .value {
-      margin: 0.25rem 0 0;
-      font-size: 1.45rem;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .kpi-highlight .sub {
-      margin: 0.25rem 0 0;
-      opacity: 0.9;
-      font-size: 0.72rem;
-    }
-
-    .section-header {
-      margin: 0;
-      font-size: 0.92rem;
-      font-weight: 700;
-      color: #212a36;
-    }
-
-    .section-note {
-      margin: 0.1rem 0 0.35rem;
-      color: var(--muted);
-      font-size: 0.76rem;
-    }
-
-    div[data-testid="stMetric"] {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      padding: 0.48rem;
-      box-shadow: none;
-    }
-
-    div[data-testid="stMetricLabel"] p {
-      color: #6f7a86 !important;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      font-size: 0.66rem;
-      font-weight: 700;
-    }
-
-    div[data-testid="stMetricValue"] {
-      color: #1f2937 !important;
-      font-weight: 700;
-      font-size: 1.38rem;
-    }
-
-    div[data-testid="stDataFrame"] {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      overflow: hidden;
-      background: #ffffff;
-    }
-
-    div[data-testid="stSidebar"] {
-      border-right: 1px solid #d6dce4;
-      background: #f4f6f9;
-    }
-
-    button[kind="primary"] {
-      background: var(--teal) !important;
-      border-color: var(--teal) !important;
-    }
-
-    .stTabs [role="tab"] {
-      font-weight: 600;
-      font-size: 0.8rem;
-    }
-
-    .rail {
-      margin-top: 0.2rem;
-      padding: 0.45rem;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-      color: #44515f;
-      font-size: 0.76rem;
-    }
-
-    .rail b {
-      color: #1f2c3a;
-    }
+    .stApp {font-family: "Inter", sans-serif; background: #eff1f3;}
+    .block-container {max-width: 1500px; padding-top: 0.45rem; padding-bottom: 1rem;}
+    .topbar {background: #fff; border: 1px solid #d8dde3; border-radius: 10px; padding: 0.55rem 0.8rem; margin-bottom: 0.5rem;}
+    .topbar h1 {margin:0; font-size: 0.98rem; font-weight:700; color:#1c2733;}
+    .topbar p {margin:0.12rem 0 0; color:#6e7782; font-size:0.78rem;}
+    .chip {display:inline-block; border:1px solid #d8dde3; border-radius:999px; padding:0.18rem 0.54rem; font-size:0.7rem; color:#3d4854; background:#f7f9fb; font-weight:600; margin-right:0.3rem;}
+    .chip.active {background:#d7ece8; border-color:#b5d7d1; color:#0b6458;}
+    .section-header {margin: 0; font-size: 0.92rem; font-weight: 700; color: #212a36;}
+    .section-note {margin: 0.1rem 0 0.35rem; color: #6e7782; font-size: 0.76rem;}
+    div[data-testid="stMetric"] {background:#fff; border:1px solid #d8dde3; border-radius:9px; padding:0.48rem;}
+    div[data-testid="stMetricLabel"] p {font-size:0.66rem; text-transform:uppercase; letter-spacing:0.4px;}
+    div[data-testid="stMetricValue"] {font-size:1.38rem; font-weight:700;}
+    div[data-testid="stDataFrame"] {border:1px solid #d8dde3; border-radius:8px; overflow:hidden; background:#fff;}
     </style>
     """,
     unsafe_allow_html=True,
@@ -218,7 +77,6 @@ def get_auth_config() -> Dict[str, Dict[str, str]]:
             return dict(st.secrets["auth_users"])
     except Exception:
         pass
-
     env_user = os.getenv("APP_USER")
     env_pass = os.getenv("APP_PASSWORD")
     env_role = os.getenv("APP_ROLE", "admin")
@@ -245,7 +103,6 @@ def login_ui() -> Optional[str]:
             username = st.text_input("Username")
             password = st.text_input("Password", type="password")
             submitted = st.form_submit_button("Login", use_container_width=True)
-
         if submitted:
             entry = users.get(username)
             if entry and password == entry.get("password"):
@@ -254,7 +111,6 @@ def login_ui() -> Optional[str]:
                 st.session_state["role"] = entry.get("role", "viewer")
                 st.rerun()
             st.error("Invalid username or password")
-
         st.caption("Demo credentials: admin/admin123 or viewer/viewer123")
     return None
 
@@ -280,6 +136,7 @@ def show_report_section(title: str, report_key: str, reports: Dict[str, pd.DataF
         file_name=filename,
         mime="text/csv",
         use_container_width=True,
+        key=f"dl_{report_key}",
     )
 
 
@@ -287,18 +144,18 @@ role = login_ui()
 if role is None:
     st.stop()
 
+username = st.session_state.get("username", "unknown")
+
 st.markdown(
     """
     <div class="topbar">
+      <h1>Sales Performance Workspace</h1>
+      <p>Enterprise view for dealership, branch, and model performance with AI assistance.</p>
       <div>
-        <h1>Sales Performance Workspace</h1>
-        <p>Enterprise view for dealership, branch, and model performance tracking.</p>
-      </div>
-      <div class="chip-row">
         <span class="chip active">Status</span>
         <span class="chip">Sales</span>
         <span class="chip">Forecast</span>
-        <span class="chip">Requests</span>
+        <span class="chip">AI Insights</span>
       </div>
     </div>
     """,
@@ -307,13 +164,13 @@ st.markdown(
 
 with st.sidebar:
     st.header("Navigation")
-    st.markdown("<div class='rail'><b>Dashboard</b><br/>Sales Analytics<br/>Exports<br/>Settings</div>", unsafe_allow_html=True)
-
+    st.markdown("Dashboard\n\nAI Tools\n\nExports\n\nAudit")
     st.header("Session")
-    st.write(f"User: `{st.session_state.get('username')}`")
+    st.write(f"User: `{username}`")
     st.write(f"Role: `{role}`")
+    performance_mode = st.toggle("Performance Mode", value=True, help="Skip heavy sections for faster rendering")
     if st.button("Logout", use_container_width=True):
-        for k in ["authenticated", "username", "role", "uploaded_source"]:
+        for k in ["authenticated", "username", "role", "uploaded_source", "preset_payload"]:
             st.session_state.pop(k, None)
         st.rerun()
 
@@ -328,10 +185,14 @@ with st.sidebar:
                 "saved_name": selected["saved_name"],
                 "name": selected["original_name"],
             }
+            log_audit_event(username, "load_history", {"file": selected["original_name"]})
             st.rerun()
 
+with st.expander("Data Dictionary & Validation Rules", expanded=False):
+    st.dataframe(data_dictionary(), use_container_width=True)
+
 with st.container(border=True):
-    section_header("Data Source", "Upload your latest CSV extract.")
+    section_header("Data Source", "Upload latest CSV extract")
     uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 
 raw_df: Optional[pd.DataFrame] = None
@@ -351,6 +212,7 @@ if uploaded_file is not None:
         }
         status.update(label="Upload ready", state="complete")
     source_name = uploaded_file.name
+    log_audit_event(username, "upload", {"file": source_name, "rows": int(raw_df.shape[0])})
 elif st.session_state.get("uploaded_source"):
     src = st.session_state["uploaded_source"]
     source_name = src.get("name", "restored.csv")
@@ -379,31 +241,16 @@ if missing_columns:
 
 quality = data_quality_summary(df)
 with st.container(border=True):
-    section_header("Key Sales Figures", "Summary of quality and inclusion checks.")
-
-    left_kpi, right_kpi = st.columns([3, 1])
-    with left_kpi:
-        q1, q2, q3, q4 = st.columns(4)
-        q1.metric("Total Rows", quality.total_rows)
-        q2.metric("Mobile Rows", quality.mobile_rows)
-        q3.metric("Excluded", quality.excluded_non_mobile)
-        q4.metric("Duplicates", quality.duplicate_rows)
-        q5, q6, q7 = st.columns(3)
-        q5.metric("Invalid Dates", quality.invalid_dates)
-        q6.metric("Missing Dealership", quality.missing_dealership)
-        q7.metric("Missing Branch/Model", quality.missing_branch + quality.missing_model)
-
-    with right_kpi:
-        st.markdown(
-            f"""
-            <div class="kpi-highlight">
-              <p class="label">Sold this period</p>
-              <p class="value">{quality.mobile_rows:,}</p>
-              <p class="sub">Eligible mobile device records</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    section_header("Key Sales Figures", "Summary of quality and inclusion checks")
+    q1, q2, q3, q4 = st.columns(4)
+    q1.metric("Total Rows", quality.total_rows)
+    q2.metric("Mobile Rows", quality.mobile_rows)
+    q3.metric("Excluded", quality.excluded_non_mobile)
+    q4.metric("Duplicates", quality.duplicate_rows)
+    q5, q6, q7 = st.columns(3)
+    q5.metric("Invalid Dates", quality.invalid_dates)
+    q6.metric("Missing Dealership", quality.missing_dealership)
+    q7.metric("Missing Branch/Model", quality.missing_branch + quality.missing_model)
 
 with st.status("Preparing analytics...", expanded=False) as status:
     status.write("Applying sales rules")
@@ -414,24 +261,37 @@ if prepared.empty:
     st.warning("No rows found where type is 'Mobile device'.")
     st.stop()
 
-with st.container(border=True):
-    section_header("Filters", "Choose period and business dimensions.")
-    has_valid_dates = prepared["disbursed_date"].notna().any()
+# Filter preset management
+presets = load_filter_presets()
+user_presets = [p for p in presets if p.get("user") == username]
 
+with st.container(border=True):
+    section_header("Filters", "Choose period and business dimensions")
+
+    preset_options = ["None"] + [f"{p['name']} ({p['created_at']})" for p in user_presets]
+    preset_choice = st.selectbox("Saved Presets", preset_options, index=0)
+
+    preset_payload = None
+    if preset_choice != "None":
+        preset_payload = user_presets[preset_options.index(preset_choice) - 1]["payload"]
+
+    has_valid_dates = prepared["disbursed_date"].notna().any()
     col1, col2, col3 = st.columns(3)
-    filter_mode = col1.selectbox("Report Period", ["All Dates", "This Week", "This Month", "Custom Range"])
+
+    default_mode = preset_payload.get("filter_mode", "All Dates") if preset_payload else "All Dates"
+    filter_mode = col1.selectbox("Report Period", ["All Dates", "This Week", "This Month", "Custom Range"], index=["All Dates", "This Week", "This Month", "Custom Range"].index(default_mode))
 
     all_dealers = sorted([x for x in prepared["dealership"].dropna().unique().tolist() if str(x).strip()])
     all_branches = sorted([x for x in prepared["branch_office"].dropna().unique().tolist() if str(x).strip()])
     all_models = sorted([x for x in prepared["model"].dropna().unique().tolist() if str(x).strip()])
     all_makes = sorted([x for x in prepared["make"].dropna().unique().tolist() if str(x).strip()])
 
-    sel_dealers = col2.multiselect("Dealership", options=all_dealers)
-    sel_branches = col3.multiselect("Branch", options=all_branches)
+    sel_dealers = col2.multiselect("Dealership", options=all_dealers, default=(preset_payload.get("dealers", []) if preset_payload else []))
+    sel_branches = col3.multiselect("Branch", options=all_branches, default=(preset_payload.get("branches", []) if preset_payload else []))
 
     col4, col5 = st.columns(2)
-    sel_models = col4.multiselect("Model", options=all_models)
-    sel_makes = col5.multiselect("Make", options=all_makes)
+    sel_models = col4.multiselect("Model", options=all_models, default=(preset_payload.get("models", []) if preset_payload else []))
+    sel_makes = col5.multiselect("Make", options=all_makes, default=(preset_payload.get("makes", []) if preset_payload else []))
 
     start_dt = None
     end_dt = None
@@ -439,9 +299,13 @@ with st.container(border=True):
         if has_valid_dates:
             min_date = prepared["disbursed_date"].min().date()
             max_date = prepared["disbursed_date"].max().date()
-            selected_range = st.date_input(
-                "Custom Range", value=(min_date, max_date), min_value=min_date, max_value=max_date
-            )
+            default_range = (min_date, max_date)
+            if preset_payload and preset_payload.get("start_dt") and preset_payload.get("end_dt"):
+                default_range = (
+                    pd.to_datetime(preset_payload["start_dt"]).date(),
+                    pd.to_datetime(preset_payload["end_dt"]).date(),
+                )
+            selected_range = st.date_input("Custom Range", value=default_range, min_value=min_date, max_value=max_date)
             if isinstance(selected_range, tuple) and len(selected_range) == 2:
                 start_dt, end_dt = selected_range
             else:
@@ -455,6 +319,33 @@ with st.container(border=True):
         st.warning("No valid dates found. Showing all dates.")
         filter_mode = "All Dates"
 
+    p1, p2 = st.columns([2, 1])
+    preset_name = p1.text_input("Preset name", value="")
+    if p1.button("Save Current Preset"):
+        if not preset_name.strip():
+            st.warning("Enter preset name")
+        else:
+            payload = {
+                "filter_mode": filter_mode,
+                "dealers": sel_dealers,
+                "branches": sel_branches,
+                "models": sel_models,
+                "makes": sel_makes,
+                "start_dt": str(start_dt) if start_dt else "",
+                "end_dt": str(end_dt) if end_dt else "",
+            }
+            save_filter_preset(preset_name.strip(), username, payload)
+            log_audit_event(username, "save_preset", {"name": preset_name.strip()})
+            st.success("Preset saved")
+            st.rerun()
+
+    if preset_choice != "None" and p2.button("Delete Selected Preset"):
+        preset_id = user_presets[preset_options.index(preset_choice) - 1]["id"]
+        delete_filter_preset(preset_id)
+        log_audit_event(username, "delete_preset", {"id": preset_id})
+        st.success("Preset deleted")
+        st.rerun()
+
 filtered = filter_data(prepared, sel_dealers, sel_branches, sel_models, sel_makes)
 filtered = apply_date_filter(filtered, filter_mode, start_dt, end_dt)
 
@@ -462,20 +353,154 @@ if filtered.empty:
     st.warning("No records match selected filters.")
     st.stop()
 
-reports = build_reports(filtered)
-comparison = compare_periods(filtered)
+# Interactive drill-through
+with st.container(border=True):
+    section_header("Interactive Drill-Through", "Use top performers to drill into report context")
+    tmp_reports = build_reports(filtered)
+    top_dealers = ["All"] + tmp_reports["sales_by_dealership"]["dealership"].head(10).astype(str).tolist()
+    top_branches = ["All"] + tmp_reports["sales_by_branch"]["branch_office"].head(10).astype(str).tolist()
+    d1, d2 = st.columns(2)
+    drill_dealer = d1.selectbox("Focus Dealership", top_dealers)
+    drill_branch = d2.selectbox("Focus Branch", top_branches)
+
+analysis_df = filtered.copy()
+if drill_dealer != "All":
+    analysis_df = analysis_df[analysis_df["dealership"] == drill_dealer]
+if drill_branch != "All":
+    analysis_df = analysis_df[analysis_df["branch_office"] == drill_branch]
+
+if analysis_df.empty:
+    st.warning("Drill-through selection returned no rows. Reverting to filtered data.")
+    analysis_df = filtered
+
+reports = build_reports(analysis_df)
+comparison = compare_periods(analysis_df)
+insights = auto_insights(reports, comparison, quality)
+alerts = smart_alerts(reports, quality, comparison)
+root_causes = root_cause_suggestions(analysis_df)
+anomalies = detect_anomalies(analysis_df)
 
 with st.container(border=True):
-    section_header("Snapshot", "Current period commercial health.")
+    section_header("Executive Summary", "Top facts and AI-generated highlights")
     m1, m2, m3, m4, m5 = st.columns(5)
-    m1.metric("Total Units", int(len(filtered)))
+    m1.metric("Total Units", int(len(analysis_df)))
     m2.metric("Dealerships", int(reports["sales_by_dealership"].shape[0]))
     m3.metric("Branches", int(reports["sales_by_branch"].shape[0]))
     m4.metric("Models", int(reports["sales_by_model"].shape[0]))
     m5.metric("Period Change", f"{comparison['pct_change']:.1f}%")
 
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("**Auto Insights**")
+        for ins in insights:
+            st.write(f"- {ins}")
+    with c2:
+        st.markdown("**Root Cause Suggestions**")
+        for rc in root_causes:
+            st.write(f"- {rc}")
+
 with st.container(border=True):
-    section_header("Forecast and Trends", "Operational trend indicators.")
+    section_header("Smart Alerts", "Automated thresholds and risk notifications")
+    if alerts:
+        for a in alerts:
+            if a["level"] == "high":
+                st.error(a["message"])
+            elif a["level"] == "medium":
+                st.warning(a["message"])
+            else:
+                st.info(a["message"])
+    else:
+        st.success("No alerts triggered in current view.")
+
+with st.container(border=True):
+    section_header("Anomaly Detection", "Outlier weeks identified from time-series z-score")
+    if anomalies.empty:
+        st.info("No significant anomalies detected.")
+    else:
+        st.dataframe(anomalies, use_container_width=True)
+
+with st.container(border=True):
+    section_header("Forecasting", "Next period predictions by dealership/model")
+    fc_col1, fc_col2 = st.columns(2)
+    with fc_col1:
+        fc_dealer = forecast_sales(analysis_df, by="dealership", periods=1)
+        st.markdown("**Dealership Forecast (Next Month)**")
+        st.dataframe(fc_dealer.head(15), use_container_width=True)
+    with fc_col2:
+        fc_model = forecast_sales(analysis_df, by="model", periods=1)
+        st.markdown("**Model Forecast (Next Month)**")
+        st.dataframe(fc_model.head(15), use_container_width=True)
+
+with st.container(border=True):
+    section_header("Target vs Actual", "Upload target file to monitor achievement")
+    st.caption("Required target columns: dealership, branch_office, target_sales")
+    target_file = st.file_uploader("Upload Targets CSV", type=["csv"], key="targets_upload")
+    if target_file is not None:
+        targets_df = pd.read_csv(target_file, dtype=str)
+        tva = target_vs_actual(analysis_df, targets_df)
+        if tva.empty:
+            st.warning("Invalid target file format.")
+        else:
+            st.dataframe(tva, use_container_width=True)
+    rec_targets = recommend_targets(analysis_df)
+    st.markdown("**AI Target Recommendations**")
+    st.dataframe(rec_targets.head(15), use_container_width=True)
+
+with st.container(border=True):
+    section_header("Natural Language Q&A", "Ask questions about current filtered data")
+    q = st.text_input("Ask a question", placeholder="Which branch has highest sales?")
+    if st.button("Answer"):
+        answer = nl_qa(q, analysis_df, reports)
+        st.info(answer)
+        log_audit_event(username, "qa_query", {"question": q, "answer": answer})
+
+with st.container(border=True):
+    section_header("Data Cleaning Assistant", "Detected cleaning opportunities and normalization hints")
+    cleaning = cleaning_assistant(df)
+    if not cleaning["summary"].empty:
+        st.dataframe(cleaning["summary"], use_container_width=True)
+    else:
+        st.success("No major cleaning issues detected.")
+    if not cleaning["dealership_suggestions"].empty:
+        with st.expander("Dealership Normalization Suggestions"):
+            st.dataframe(cleaning["dealership_suggestions"], use_container_width=True)
+
+with st.container(border=True):
+    section_header("Narrative Report Generator", "One-click executive text briefing")
+    narrative = generate_narrative(reports, comparison, alerts, insights)
+    st.text_area("Narrative", value=narrative, height=180)
+    st.download_button(
+        "Download Narrative TXT",
+        data=narrative.encode("utf-8"),
+        file_name="management_narrative.txt",
+        mime="text/plain",
+        use_container_width=True,
+    )
+
+with st.container(border=True):
+    section_header("What-if Simulator", "Estimate impact of strategic uplift scenarios")
+    w1, w2 = st.columns(2)
+    dealer_uplift = w1.slider("Dealership uplift %", min_value=-30, max_value=50, value=10)
+    branch_uplift = w2.slider("Branch uplift %", min_value=-30, max_value=50, value=5)
+    sim = what_if_simulation(int(len(analysis_df)), float(dealer_uplift), float(branch_uplift))
+    s1, s2, s3 = st.columns(3)
+    s1.metric("Base Total", int(sim["base_total"]))
+    s2.metric("Projected Total", int(sim["projected_total"]))
+    s3.metric("Delta", int(sim["delta"]))
+
+with st.container(border=True):
+    section_header("Scheduled Report Helper", "Generate a deployment-ready schedule plan")
+    sch1, sch2, sch3 = st.columns(3)
+    freq = sch1.selectbox("Frequency", ["Daily", "Weekly"])
+    day = sch2.selectbox("Day", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
+    time_24h = sch3.text_input("Time (24h)", value="09:00")
+    sched_recipients = st.text_input("Recipients for scheduled run", value="")
+    if st.button("Generate Schedule Plan"):
+        plan = schedule_report_helper(freq, day, time_24h, [x.strip() for x in sched_recipients.split(",") if x.strip()])
+        st.success(plan)
+
+with st.container(border=True):
+    section_header("Forecast and Trends", "Operational trend indicators")
     c1, c2 = st.columns(2)
     with c1:
         if "sales_by_week" in reports:
@@ -488,40 +513,48 @@ with st.container(border=True):
         st.bar_chart(branch_top["sales_count"], color="#2a9d8f")
 
 with st.container(border=True):
-    section_header("Exports", "Distribute validated reporting outputs.")
+    section_header("Exports", "Distribute validated reporting outputs")
     excel_bytes = to_excel_download(reports)
-    pdf_bytes = to_pdf_download(reports, comparison, int(len(filtered)))
+    pdf_bytes = to_pdf_download(reports, comparison, int(len(analysis_df)))
 
-    ex1, ex2, ex3 = st.columns(3)
-    ex1.download_button(
-        "Export Full Report (Excel)",
-        data=excel_bytes,
-        file_name="management_sales_report.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        use_container_width=True,
-    )
-    ex2.download_button(
-        "Export Filtered Raw Data (CSV)",
-        data=to_csv_download(filtered),
-        file_name="filtered_mobile_device_data.csv",
-        mime="text/csv",
-        use_container_width=True,
-    )
-    ex3.download_button(
-        "Export Briefing (PDF)",
-        data=pdf_bytes,
-        file_name="management_briefing.pdf",
-        mime="application/pdf",
-        use_container_width=True,
-    )
+    if role == "viewer":
+        st.caption("Viewer role: CSV exports only")
+        st.download_button(
+            "Export Filtered Raw Data (CSV)",
+            data=to_csv_download(analysis_df),
+            file_name="filtered_mobile_device_data.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+    else:
+        ex1, ex2, ex3 = st.columns(3)
+        ex1.download_button(
+            "Export Full Report (Excel)",
+            data=excel_bytes,
+            file_name="management_sales_report.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True,
+        )
+        ex2.download_button(
+            "Export Filtered Raw Data (CSV)",
+            data=to_csv_download(analysis_df),
+            file_name="filtered_mobile_device_data.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+        ex3.download_button(
+            "Export Briefing (PDF)",
+            data=pdf_bytes,
+            file_name="management_briefing.pdf",
+            mime="application/pdf",
+            use_container_width=True,
+        )
 
 if role == "admin":
     with st.container(border=True):
-        section_header("Email Report (Admin)", "Send current report pack to stakeholders.")
+        section_header("Email Report (Admin)", "Send current report pack to stakeholders")
         recipients_text = st.text_input("Recipients (comma-separated)", value="")
-        email_subject = st.text_input(
-            "Subject", value=f"Management Sales Report - {datetime.now().strftime('%Y-%m-%d')}"
-        )
+        email_subject = st.text_input("Subject", value=f"Management Sales Report - {datetime.now().strftime('%Y-%m-%d')}")
 
         smtp_host = os.getenv("SMTP_HOST", "")
         smtp_port = int(os.getenv("SMTP_PORT", "587"))
@@ -545,11 +578,12 @@ if role == "admin":
             )
             if ok:
                 st.success(msg)
+                log_audit_event(username, "send_email", {"recipients": recipients, "subject": email_subject})
             else:
                 st.error(msg + " | Configure SMTP_* env vars")
 
 with st.container(border=True):
-    section_header("Detailed Reports", "Data-heavy breakdowns for operational review.")
+    section_header("Detailed Reports", "Data-heavy breakdowns for operational review")
     tab1, tab2, tab3, tab4 = st.tabs(["Dealership", "Model", "Branch", "Detailed"])
     with tab1:
         show_report_section("Sales by Dealership", "sales_by_dealership", reports, "sales_by_dealership.csv")
@@ -567,7 +601,7 @@ with st.container(border=True):
 
 if "sales_by_month" in reports or "sales_by_week" in reports:
     with st.container(border=True):
-        section_header("Time Reports", "Month and week aggregated outputs.")
+        section_header("Time Reports", "Month and week aggregated outputs")
         t1, t2 = st.columns(2)
         if "sales_by_month" in reports:
             with t1:
@@ -575,3 +609,12 @@ if "sales_by_month" in reports or "sales_by_week" in reports:
         if "sales_by_week" in reports:
             with t2:
                 show_report_section("Sales by Week", "sales_by_week", reports, "sales_by_week.csv")
+
+if not performance_mode:
+    with st.container(border=True):
+        section_header("Audit Trail", "Recent user and system actions")
+        audit = pd.DataFrame(load_audit_log())
+        if audit.empty:
+            st.info("No audit entries yet.")
+        else:
+            st.dataframe(audit.head(200), use_container_width=True)

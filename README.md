@@ -14,6 +14,20 @@ Cyber-styled Streamlit app for management sales reporting from CSV uploads.
 9. Security and access (login + role-based control: `admin`, `viewer`)
 10. Deployment hardening (pinned dependencies + sample CSV + tests)
 
+## AI Capabilities
+- Auto insights and root-cause suggestions
+- Weekly anomaly detection
+- Forecasting by dealership/model
+- Natural-language Q&A
+- Smart alerts and risk notifications
+- Data cleaning assistant suggestions
+- Target-vs-actual analysis + AI target recommendations
+- Narrative briefing generator
+- What-if simulator
+- Scheduled report helper
+- Saved filter presets
+- Audit trail logging
+
 ## Login
 Default credentials (change via env/secrets):
 - `admin / admin123`
