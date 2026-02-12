@@ -1,5 +1,6 @@
 import re
 from io import BytesIO, StringIO
+from typing import Dict, Optional
 
 import pandas as pd
 import streamlit as st
@@ -109,7 +110,7 @@ def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def build_reports(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
+def build_reports(df: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     reports = {
         "sales_by_dealership": (
             df.groupby("dealership", dropna=False)
@@ -162,7 +163,10 @@ def build_reports(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
 
 
 def apply_date_filter(
-    df: pd.DataFrame, filter_mode: str, start_date: pd.Timestamp | None, end_date: pd.Timestamp | None
+    df: pd.DataFrame,
+    filter_mode: str,
+    start_date: Optional[pd.Timestamp],
+    end_date: Optional[pd.Timestamp],
 ) -> pd.DataFrame:
     if filter_mode == "All Dates":
         return df
@@ -197,7 +201,7 @@ def to_csv_download(df: pd.DataFrame) -> bytes:
     return buffer.getvalue().encode("utf-8")
 
 
-def to_excel_download(reports: dict[str, pd.DataFrame]) -> bytes:
+def to_excel_download(reports: Dict[str, pd.DataFrame]) -> bytes:
     buffer = BytesIO()
     sheet_map = {
         "sales_by_dealership": "By_Dealership",
@@ -216,7 +220,9 @@ def to_excel_download(reports: dict[str, pd.DataFrame]) -> bytes:
     return buffer.getvalue()
 
 
-def show_report_section(title: str, report_key: str, reports: dict[str, pd.DataFrame], filename: str) -> None:
+def show_report_section(
+    title: str, report_key: str, reports: Dict[str, pd.DataFrame], filename: str
+) -> None:
     st.markdown(f"### {title}")
     st.dataframe(reports[report_key], use_container_width=True, height=320)
     st.download_button(
@@ -277,12 +283,17 @@ if filter_mode == "Custom Range":
     if has_valid_dates:
         min_date = prepared["disbursed_date"].min().date()
         max_date = prepared["disbursed_date"].max().date()
-        start_dt, end_dt = right.date_input(
+        selected_range = right.date_input(
             "Custom Range",
             value=(min_date, max_date),
             min_value=min_date,
             max_value=max_date,
         )
+        if isinstance(selected_range, tuple) and len(selected_range) == 2:
+            start_dt, end_dt = selected_range
+        else:
+            st.error("Please select both start and end dates.")
+            st.stop()
         if start_dt > end_dt:
             st.error("Start Date cannot be after End Date.")
             st.stop()
