@@ -51,24 +51,10 @@ st.markdown(
         linear-gradient(180deg, var(--bg1), var(--bg0));
       background-size: 42px 42px, 42px 42px, auto, auto, auto;
       font-family: "Rajdhani", sans-serif;
-      position: relative;
       overflow-x: hidden;
     }
-    .stApp::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background: linear-gradient(180deg, rgba(255,255,255,0.015) 0%, rgba(255,255,255,0.015) 48%, rgba(0,0,0,0.0) 49%, rgba(0,0,0,0.0) 100%);
-      background-size: 100% 5px;
-      mix-blend-mode: screen;
-      opacity: 0.24;
-      animation: scan 7s linear infinite;
-      z-index: 0;
-    }
-    @keyframes scan {0% {transform: translateY(-4px);} 100% {transform: translateY(4px);}}
-    #MainMenu, header[data-testid="stHeader"], footer {visibility: hidden;}
-    .block-container {position: relative; z-index: 1; max-width: 1450px;}
+    #MainMenu, footer {visibility: hidden;}
+    .block-container {max-width: 1450px;}
 
     .topbar {
       border: 1px solid rgba(113, 143, 183, 0.22);

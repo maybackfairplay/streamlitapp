@@ -9,8 +9,6 @@ from io import BytesIO, StringIO
 from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
 
 CANONICAL_COLUMNS = {
     "client_mobile_no": "clientmobileno",
@@ -248,6 +246,19 @@ def to_excel_download(reports: Dict[str, pd.DataFrame]) -> bytes:
 
 
 def to_pdf_download(reports: Dict[str, pd.DataFrame], comparison: Dict[str, float], total_sales: int) -> bytes:
+    try:
+        from reportlab.lib.pagesizes import A4
+        from reportlab.pdfgen import canvas
+    except Exception:
+        # If reportlab is unavailable in runtime, return a plain-text fallback payload.
+        text = (
+            "Management Sales Briefing\n"
+            f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
+            f"Total Mobile Device Sales: {total_sales}\n"
+            f"Comparison: {int(comparison['current'])} vs {int(comparison['previous'])} ({comparison['pct_change']:.1f}%)\n"
+        )
+        return text.encode("utf-8")
+
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
