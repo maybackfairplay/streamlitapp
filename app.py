@@ -50,38 +50,38 @@ st.markdown(
 
     .block-container {
       max-width: 1500px;
-      padding-top: 0.7rem;
-      padding-bottom: 2rem;
+      padding-top: 0.45rem;
+      padding-bottom: 1.2rem;
     }
 
     .topbar {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      padding: 0.55rem 0.8rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 0.8rem;
+      margin-bottom: 0.5rem;
     }
 
     .topbar h1 {
       margin: 0;
-      font-size: 1.05rem;
+      font-size: 0.98rem;
       font-weight: 700;
       color: #1c2733;
       letter-spacing: 0.1px;
     }
 
     .topbar p {
-      margin: 0.2rem 0 0;
+      margin: 0.12rem 0 0;
       color: var(--muted);
-      font-size: 0.84rem;
+      font-size: 0.78rem;
     }
 
     .chip-row {
       display: flex;
-      gap: 0.45rem;
+      gap: 0.35rem;
       flex-wrap: wrap;
       align-items: center;
     }
@@ -89,8 +89,8 @@ st.markdown(
     .chip {
       border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 0.24rem 0.62rem;
-      font-size: 0.75rem;
+      padding: 0.18rem 0.54rem;
+      font-size: 0.7rem;
       color: #3d4854;
       background: #f7f9fb;
       font-weight: 600;
@@ -106,50 +106,50 @@ st.markdown(
       background: #176f63;
       color: #ffffff;
       border: 1px solid #155d54;
-      border-radius: 14px;
-      padding: 0.95rem 1rem;
-      min-height: 120px;
+      border-radius: 10px;
+      padding: 0.72rem 0.8rem;
+      min-height: 98px;
     }
 
     .kpi-highlight .label {
       margin: 0;
       opacity: 0.86;
-      font-size: 0.76rem;
+      font-size: 0.68rem;
       text-transform: uppercase;
       letter-spacing: 0.6px;
     }
 
     .kpi-highlight .value {
-      margin: 0.42rem 0 0;
-      font-size: 2rem;
+      margin: 0.25rem 0 0;
+      font-size: 1.45rem;
       font-weight: 700;
       line-height: 1;
     }
 
     .kpi-highlight .sub {
-      margin: 0.42rem 0 0;
+      margin: 0.25rem 0 0;
       opacity: 0.9;
-      font-size: 0.8rem;
+      font-size: 0.72rem;
     }
 
     .section-header {
       margin: 0;
-      font-size: 1rem;
+      font-size: 0.92rem;
       font-weight: 700;
       color: #212a36;
     }
 
     .section-note {
-      margin: 0.16rem 0 0.55rem;
+      margin: 0.1rem 0 0.35rem;
       color: var(--muted);
-      font-size: 0.84rem;
+      font-size: 0.76rem;
     }
 
     div[data-testid="stMetric"] {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 0.65rem;
+      border-radius: 9px;
+      padding: 0.48rem;
       box-shadow: none;
     }
 
@@ -157,19 +157,19 @@ st.markdown(
       color: #6f7a86 !important;
       text-transform: uppercase;
       letter-spacing: 0.4px;
-      font-size: 0.72rem;
+      font-size: 0.66rem;
       font-weight: 700;
     }
 
     div[data-testid="stMetricValue"] {
       color: #1f2937 !important;
       font-weight: 700;
-      font-size: 1.65rem;
+      font-size: 1.38rem;
     }
 
     div[data-testid="stDataFrame"] {
       border: 1px solid var(--line);
-      border-radius: 10px;
+      border-radius: 8px;
       overflow: hidden;
       background: #ffffff;
     }
@@ -186,17 +186,17 @@ st.markdown(
 
     .stTabs [role="tab"] {
       font-weight: 600;
-      font-size: 0.88rem;
+      font-size: 0.8rem;
     }
 
     .rail {
-      margin-top: 0.35rem;
-      padding: 0.65rem;
+      margin-top: 0.2rem;
+      padding: 0.45rem;
       border: 1px solid var(--line);
-      border-radius: 10px;
+      border-radius: 8px;
       background: #fff;
       color: #44515f;
-      font-size: 0.84rem;
+      font-size: 0.76rem;
     }
 
     .rail b {
@@ -273,7 +273,7 @@ def process_dataframe(df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, pd.Data
 
 def show_report_section(title: str, report_key: str, reports: Dict[str, pd.DataFrame], filename: str) -> None:
     st.subheader(title)
-    st.dataframe(reports[report_key], use_container_width=True, height=340)
+    st.dataframe(reports[report_key], use_container_width=True, height=290)
     st.download_button(
         f"Download {title} (CSV)",
         data=to_csv_download(reports[report_key]),
